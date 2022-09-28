@@ -7,7 +7,7 @@ import <thread>;
 import death;
 import label;
 
-import window_size;
+import global_settings;
 
 
 // modu³ zajmuj¹cy siê wszystkim po œmierci¹
@@ -21,7 +21,7 @@ export void main_death(sf::RenderWindow& app_render_window, Label score) {
 	sf::Sprite sprite;
 	sprite.setTexture(menu_texture);
 
-	Death death(width, height);
+	Death death(WINDOW_WIDTH, WINDOW_HEIGHT);
 	sf::Vector2i mouse_coordinates;
 
 	Label max_score(680, 0, "Max score: ", 0);

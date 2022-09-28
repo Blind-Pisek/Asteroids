@@ -3,7 +3,7 @@ export module rocket;
 import <cmath>;
 
 import unit;
-import window_size;
+import global_settings;
 
 
 export class Rocket : public Unit {
@@ -19,7 +19,7 @@ public:
         x += dx;
         y += dy;
 
-        if (x > width or x < 0 or y > height or y < 0) 
+        if (x > WINDOW_WIDTH or x < 0 or y > WINDOW_HEIGHT or y < 0)
             life = false;
     }
 

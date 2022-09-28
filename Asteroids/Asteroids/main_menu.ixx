@@ -4,7 +4,7 @@ import <SFML/Graphics.hpp>;
 
 import menu;
 
-import window_size;
+import global_settings;
 
 
 // modu³ zajmuj¹cy siê obs³ug¹ menu
@@ -18,7 +18,7 @@ export void main_menu(sf::RenderWindow &app_render_window) {
 	sf::Sprite sprite;
 	sprite.setTexture(menu_texture);
 
-	Menu menu(width, height);
+	Menu menu(WINDOW_WIDTH, WINDOW_HEIGHT);
 	sf::Event menu_event;
 	
 	sf::Vector2i mouse_coordinates;

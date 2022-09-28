@@ -3,7 +3,7 @@ export module unit;
 export import <list>;
 
 import animation;
-export import window_size;
+export import global_settings;
 
 
 export class Unit {

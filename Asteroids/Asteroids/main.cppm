@@ -1,8 +1,8 @@
 /*!
- * \brief   Symulator lotow z asteroidami
+ * \brief   Asteroids
  * \author  Karol Pisarski
  * \version 1.9
- * \date    06/06/2022
+ * \date    28/09/2022
  */
 
 import <SFML/Graphics.hpp>;
@@ -31,26 +31,25 @@ import main_menu;
 import main_resume;
 import main_death;
 
-// rozmiar okna gry
-import window_size;
+import global_settings;	// Global game settings
 
 
-int main() {
+int main() 
+{
+	std::list<Unit*> units;	// List of units (contains rockets, asteroids, main ship)
 
-	// wszystkie jednostki(asteroidy, rakiety, statek kosmiczny)
-	std::list<Unit*> units;
+	sf::Event main_event;	// Main system event
 
-	sf::Event main_event;
+	sf::RenderWindow app_render_window; // Main game window
 
-	sf::RenderWindow app_render_window;
-
-	// ustawiamy plik
-	windowSettings(app_render_window);
+	windowSettings( app_render_window );
 
 	sf::Texture texture_background;
-	texture_background.setSmooth(true);
+	texture_background.setSmooth( true );
 	
 	sf::Texture texture_spaceship;
+	texture_spaceship.setSmooth( true );
+
 	sf::Texture texture_rocket;
 	sf::Texture texture_rock;
 	sf::Texture texture_explosion;
@@ -65,23 +64,22 @@ int main() {
 	texture_explosion.loadFromFile("images/explosions/type_C_r.png");
 	
 	
-	sprite_background.setTexture(texture_background);
-	texture_spaceship.setSmooth(true);
+	sprite_background.setTexture( texture_background );
 	//making texture
-	sprite_spaceship.setTexture(texture_spaceship);
+	sprite_spaceship.setTexture( texture_spaceship );
 	//croping texture
-	sprite_spaceship.setTextureRect(sf::IntRect(40, 0, 40, 40));
+	sprite_spaceship.setTextureRect( sf::IntRect( 40, 0, 40, 40 ) );
 
-	Animation animation_rocket(texture_rocket, 0, 0, 32, 64, 16, 0.8);
-	Animation animation_spaceship(texture_spaceship, 40, 0, 40, 40, 1, 0);
-	Animation animation_moving_spaceship(texture_spaceship, 40, 40, 40, 40, 1, 0);
-	Animation animation_rock(texture_rock, 0, 0, 64, 64, 16, 0.2);
-	Animation sExplosion(texture_explosion, 0, 0, 128, 128, 192, 0.7);
+	Animation animation_rocket( texture_rocket, 0, 0, 32, 64, 16, 0.8 );
+	Animation animation_spaceship( texture_spaceship, 40, 0, 40, 40, 1, 0 );
+	Animation animation_moving_spaceship( texture_spaceship, 40, 40, 40, 40, 1, 0 );
+	Animation animation_rock( texture_rock, 0, 0, 64, 64, 16, 0.2 );
+	Animation sExplosion( texture_explosion, 0, 0, 128, 128, 192, 0.7 );
 
 
 	// napisy na ekranie podczas gry
-	Label score(680, 0, "Score: ", 0);
-	Label life(640, 870, "Remaining lives: ", 4);
+	Label score( 680, 0, "Score: ", 0 );
+	Label life( 640, 870, "Remaining lives: ", 4 );
 
 	app_render_window.clear();
 
@@ -91,7 +89,7 @@ int main() {
 
 	// tworzenie gracza
 	Spaceship* player_spaceship = new Spaceship();
-	player_spaceship->settings(animation_spaceship, app_render_window.getSize().x / 2, height / 2, 270, 20);
+	player_spaceship->settings(animation_spaceship, app_render_window.getSize().x / 2, WINDOW_HEIGHT / 2, 270, 20);
 	units.push_back(player_spaceship);
 
 	
@@ -161,7 +159,7 @@ int main() {
 						if (life.iterator <= 0) {
 							second_object->life = false;
 
-							player_spaceship->settings(animation_spaceship, width / 2, height / 2, 270, 20);
+							player_spaceship->settings(animation_spaceship, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 270, 20);
 							player_spaceship->dx = 0; player_spaceship->dy = 0;
 							std::thread thread_velocityToZero(&Spaceship::velocityToZero, player_spaceship);
 							thread_velocityToZero.detach();

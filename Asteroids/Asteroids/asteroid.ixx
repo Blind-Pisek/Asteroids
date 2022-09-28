@@ -4,7 +4,7 @@ import <typeinfo>;
 
 import unit;
 
-import window_size;
+import global_settings;
 
 export class Asteroid : public Unit {
 public:
@@ -21,20 +21,20 @@ public:
         x += dx;
         y += dy;
 
-        if (x > width) 
+        if (x > WINDOW_WIDTH) 
             x = 0;  
         if (x < 0) 
-            x = width;
-        if (y > height) 
+            x = WINDOW_WIDTH;
+        if (y > WINDOW_HEIGHT) 
             y = 0;  
         if (y < 0) 
-            y = height;
+            y = WINDOW_HEIGHT;
     }
 
     static void startSpawnAsteroids(std::list<Unit*>& units, Animation& animation_of_rock) {
         for (int i = 0; i < 4; i++) {
             Asteroid* asteroids = new Asteroid();
-            asteroids->settings(animation_of_rock, rand() % width, rand() % height, rand() % 360, 25);
+            asteroids->settings(animation_of_rock, rand() % WINDOW_WIDTH, rand() % WINDOW_HEIGHT, rand() % 360, 25);
             units.push_back(asteroids);
         }
     }
@@ -42,7 +42,7 @@ public:
     static void spawnAsteroids(std::list<Unit*>& units, Animation animation_of_rock) {
         if (rand() % 150 == 0) {
             Asteroid* asteroids = new Asteroid();
-            asteroids->settings(animation_of_rock, 0, rand() % height, rand() % 330 + 10, 25);
+            asteroids->settings(animation_of_rock, 0, rand() % WINDOW_HEIGHT, rand() % 330 + 10, 25);
             units.push_back(asteroids);
         }
     }

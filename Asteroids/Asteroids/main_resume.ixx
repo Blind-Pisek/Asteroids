@@ -4,7 +4,7 @@ import <SFML/Graphics.hpp>;
 
 import resume;
 
-import window_size;
+import global_settings;
 
 
 // modu³ zajmuj¹cy siê resume
@@ -18,7 +18,7 @@ export void main_resume(sf::RenderWindow& app_render_window) {
 	sf::Sprite sprite;
 	sprite.setTexture(menu_texture);
 
-	Resume resume(width, height);
+	Resume resume(WINDOW_WIDTH, WINDOW_HEIGHT);
 	sf::Vector2i mouse_coordinates;
 
 
