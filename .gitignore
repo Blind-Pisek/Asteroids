@@ -398,5 +398,3 @@ FodyWeavers.xsd
 *.sln.iml
 *.vcxproj
 *.vcxproj
-Asteroids/Asteroids/Asteroids.vcxproj.filters
-Asteroids/Asteroids/Asteroids.vcxproj

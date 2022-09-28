@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="program.cppm">
+    <ClCompile Include="main.cppm">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main_death.ixx">
@@ -48,7 +48,7 @@
     <ClCompile Include="window.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="window_size.ixx">
+    <ClCompile Include="global_settings.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="animation.ixx">
