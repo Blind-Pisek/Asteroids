@@ -40,6 +40,7 @@ int main()
 
 	sf::Event main_event;	// Main system event
 
+	// Could have made RenderWindow global object
 	sf::RenderWindow app_render_window; // Main game window
 
 	windowSettings( app_render_window );
@@ -64,139 +65,151 @@ int main()
 	texture_explosion.loadFromFile("images/explosions/type_C_r.png");
 	
 	
-	sprite_background.setTexture( texture_background );
-	//making texture
+	sprite_background.setTexture( texture_background );	// Making texture
 	sprite_spaceship.setTexture( texture_spaceship );
-	//croping texture
-	sprite_spaceship.setTextureRect( sf::IntRect( 40, 0, 40, 40 ) );
+	
+	sprite_spaceship.setTextureRect( sf::IntRect( 40, 0, 40, 40 ) );	// Croping texture
 
 	Animation animation_rocket( texture_rocket, 0, 0, 32, 64, 16, 0.8 );
 	Animation animation_spaceship( texture_spaceship, 40, 0, 40, 40, 1, 0 );
 	Animation animation_moving_spaceship( texture_spaceship, 40, 40, 40, 40, 1, 0 );
 	Animation animation_rock( texture_rock, 0, 0, 64, 64, 16, 0.2 );
-	Animation sExplosion( texture_explosion, 0, 0, 128, 128, 192, 0.7 );
+	Animation animation_explosion( texture_explosion, 0, 0, 128, 128, 192, 0.7 );
 
 
-	// napisy na ekranie podczas gry
+	// Labels shown during gameplay
 	Label score( 680, 0, "Score: ", 0 );
-	Label life( 640, 870, "Remaining lives: ", 4 );
+	Label life( 640, 870, "Remaining lives: ", NUMBER_OF_LIVES );
 
-	app_render_window.clear();
+	app_render_window.clear();	// Clear whole window
 
+	main_menu(app_render_window);	// Main loop before game starst
 
-	// generownie menu g³ownego
-	main_menu(app_render_window);
-
-	// tworzenie gracza
+	// Creating main spaceship and placing it on the centre of the screen
 	Spaceship* player_spaceship = new Spaceship();
-	player_spaceship->settings(animation_spaceship, app_render_window.getSize().x / 2, WINDOW_HEIGHT / 2, 270, 20);
+	player_spaceship->settings( animation_spaceship, app_render_window.getSize().x / 2,
+								app_render_window.getSize().y / 2, 270, 20 );	// Could have used global variables to pass window size
 	units.push_back(player_spaceship);
 
-	
-	// metoda tworzy kilka asteroid na start
-	std::thread thread_startSpawnAsteroids(&Asteroid::startSpawnAsteroids, std::ref(units), std::ref(animation_rock));
+	// Creating couple of asteroids on start
+	std::thread thread_startSpawnAsteroids( &Asteroid::startSpawnAsteroids, std::ref( units ), 
+											std::ref( animation_rock ) );
 	thread_startSpawnAsteroids.detach();
 
-	////// g³ówna pêtla programu //////
-	while (app_render_window.isOpen()) {
-		// kiedy cos sie dzieje to dziala
-		while (app_render_window.pollEvent(main_event)) {
-			// zamkniecie okna jak jest wymagane
-			if (main_event.type == sf::Event::Closed)
+	////// MAIN GAME LOOP //////
+	while ( app_render_window.isOpen() ) 
+	{
+		// If there is some kind of event
+		while ( app_render_window.pollEvent( main_event ) ) 
+		{
+			// Closes window if it is required
+			if ( main_event.type == sf::Event::Closed )
 				app_render_window.close();
 
-			// strzelanie
-			if (main_event.type == sf::Event::KeyPressed) {
-				if (main_event.key.code == sf::Keyboard::Space or main_event.key.code == sf::Mouse::Right) {
-					Rocket* r = new Rocket();
-					r->settings(animation_rocket, player_spaceship->x, player_spaceship->y, player_spaceship->angle, 10);
-					units.push_back(r);
+			if ( main_event.type == sf::Event::KeyPressed ) // Shooting
+			{
+				if ( main_event.key.code == sf::Keyboard::Space or 
+					 main_event.key.code == sf::Mouse::Right )
+				{
+					Rocket* new_rocket = new Rocket();
+					new_rocket->settings( animation_rocket, player_spaceship->x,
+										  player_spaceship->y, player_spaceship->angle, 10 );
+					units.push_back( new_rocket );
 				}
-				// tutaj bêdzie resume game
-				if (main_event.key.code == sf::Keyboard::Escape) {
-					main_resume(app_render_window);
+				// If ESC key is pressed the game pauses
+				if ( main_event.key.code == sf::Keyboard::Escape ) 
+				{
+					main_resume( app_render_window ); // Main loop of resuming game 
 				}
-			}
-			// sprawdzanie flag ruchu
-			player_spaceship->updateFlags(sprite_spaceship, main_event, app_render_window);
+			}	/* if key pressed */
 
-		}
-		// po sprawdzeniu flag aktualizacja XY
-		player_spaceship->update(app_render_window);
+			// Check movement flags
+			player_spaceship->updateFlags( sprite_spaceship, main_event, 
+										   app_render_window );
 
-		// animacja jak statek porusza siê w przód
-		if (player_spaceship->front_move)  
+		}	/* while */
+
+		// After activating movement key time to update spaceship coordinates
+		player_spaceship->update( app_render_window );
+
+		// Animation of frontal spaceship movement
+		if ( player_spaceship->front_move )  
 			player_spaceship->anim = animation_moving_spaceship;
 		else 
 			player_spaceship->anim = animation_spaceship;
 
 
-		for (auto first_object : units)
-			for (auto second_object : units) {
-				// tutaj trzeba z andem dodaæ jeszcze jeden warunek
-				// mozna zakodowac obiekty
-				// skorzystaj z typeid
-				// type id zwraca inta i jak sa takie same to = 0
-				//
- 				if (!strcmp(typeid(*first_object).name(), "class Rocket") and !strcmp(typeid(*second_object).name(), "class Asteroid")) {
-					if (Unit::isCollide(first_object, second_object)) {
-						first_object->life = false;
+		for ( auto first_object : units )	// Checking colision with pair of objects
+			for ( auto second_object : units )	
+			{
+				// If rocket and asteroid collide
+ 				if ( !strcmp( typeid(*first_object).name(), "class Rocket" ) and 
+					 !strcmp( typeid(*second_object).name(), "class Asteroid" ) and
+					 Unit::isCollide( first_object, second_object ) )
+				{	 
+					first_object->life = false;
+					second_object->life = false;
+
+					score.iterator++;
+
+					Explosion* e = new Explosion();
+					e->settings( animation_explosion, first_object->x, second_object->y );
+				
+				}
+
+				// If spaceship is hit by asteroid
+				if ( !strcmp( typeid(*first_object).name(), "class Spaceship" ) and 
+					 !strcmp( typeid(*second_object).name(), "class Asteroid")  and
+					 Unit::isCollide( first_object, second_object ) )
+				{
+
+					life.iterator--;	// Decrement number of lives
+
+					if (life.iterator <= 0) 
+					{
 						second_object->life = false;
 
-						score.iterator++;	
+						player_spaceship->settings( animation_spaceship, WINDOW_WIDTH / 2, 
+													WINDOW_HEIGHT / 2, 270, 20 );
 
+						player_spaceship->dx = 0; player_spaceship->dy = 0;
+
+						std::thread thread_velocityToZero(&Spaceship::velocityToZero, player_spaceship);
+						thread_velocityToZero.detach();
+
+						main_death( app_render_window, score );	// Death screen main loop
+
+						life.iterator = NUMBER_OF_LIVES;	// If game restarted life iterator 
+						score.iterator = 0;
+
+						std::thread thread_deleteAllAstroids(&Asteroid::deleteAllAsteroids, std::ref(units));
+						std::thread thread_deleteAllRockets(&Rocket::deleteAllRockets, std::ref(units));
+						std::thread thread_delExplosion(&Explosion::delExplosion, std::ref(units));
+
+						std::thread thread_startSpawnAsteroids(&Asteroid::startSpawnAsteroids, std::ref(units), std::ref(animation_rock));
+						// semafor aby obiekty nie usuwa³y siê na wzajem
+						std::counting_semaphore<1> semaphore(0);
+
+						thread_deleteAllAstroids.detach();
+						semaphore.release();
+
+						thread_deleteAllRockets.detach();
+						thread_delExplosion.detach();
+
+						semaphore.acquire();
+						thread_startSpawnAsteroids.detach();
+
+					}
+					else 
+					{
+						second_object->life = false;
 						Explosion* e = new Explosion();
-						e->settings(sExplosion, first_object->x, second_object->y);
+						e->settings(animation_explosion, second_object->x, second_object->y);
 						units.push_back(e);
 					}
 				}
-				// sprobuj regexem szukac spaceship, asteroidy i rakiety
-				if (!strcmp(typeid(*first_object).name(), "class Spaceship") and !strcmp(typeid(*second_object).name(), "class Asteroid"))
-					if (Unit::isCollide(first_object, second_object)) {
 
-						life.iterator--;
-
-						if (life.iterator <= 0) {
-							second_object->life = false;
-
-							player_spaceship->settings(animation_spaceship, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 270, 20);
-							player_spaceship->dx = 0; player_spaceship->dy = 0;
-							std::thread thread_velocityToZero(&Spaceship::velocityToZero, player_spaceship);
-							thread_velocityToZero.detach();
-
-							main_death(app_render_window, score);
-
-							// zycie z powrotem na 4
-							life.iterator = 4;
-							score.iterator = 0;
-
-							std::thread thread_deleteAllAstroids(&Asteroid::deleteAllAsteroids, std::ref(units));
-							std::thread thread_deleteAllRockets(&Rocket::deleteAllRockets, std::ref(units));
-							std::thread thread_delExplosion(&Explosion::delExplosion, std::ref(units));
-
-							std::thread thread_startSpawnAsteroids(&Asteroid::startSpawnAsteroids, std::ref(units), std::ref(animation_rock));
-							// semafor aby obiekty nie usuwa³y siê na wzajem
-							std::counting_semaphore<1> semaphore(0);
-
-							thread_deleteAllAstroids.detach();
-							semaphore.release();
-
-							thread_deleteAllRockets.detach();
-							thread_delExplosion.detach();
-
-							semaphore.acquire();
-							thread_startSpawnAsteroids.detach();
-
-						}
-						else {
-							second_object->life = false;
-							Explosion* e = new Explosion();
-							e->settings(sExplosion, second_object->x, second_object->y);
-							units.push_back(e);
-						}
-					}
-
-			}
+			} /* for() first & second object */
 		// popraw te w¹tki bo nadal nie dzia³aja
 		// 
 		// usuwanie animacji eksplozji
@@ -225,15 +238,16 @@ int main()
 		/*std::thread thread_drawObjects(&Unit::drawObjects, std::ref(app_render_window), std::ref(units));
 		thread_drawObjects.join();*/
 	
-
+		// Updating labels iterators
 		score.updateIterator();
 		life.updateIterator();
 
+		// Drawing labels
 		score.draw(app_render_window);
 		life.draw(app_render_window);
 
 		app_render_window.display();
-	}
+	}	/* while MAIN GAME LOOP */ 
 
 	return 0;
 }
